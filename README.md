@@ -22,7 +22,7 @@ The cleaned and merged dataset will be:
 
 ---
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 - Python  
 - Pandas  
