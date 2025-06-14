@@ -5,12 +5,17 @@
 - Will store in a SQL data warehouse and have datareporting from PowerBI
 - This python scripts main purpose is to import, ingest, and clean data from multiple sources
 '''
+#install world bank package
+!pip install wbdata
 
-#import data management libraries
+#import data management packages
 import pandas as pd
 import requests
 import os
-from datetime import datetime as dt
+import datetime as dt
+import pandas_datareader as pdr
+import wbdata #worldbank data
+
 
 #Conflict Data
 def UCDP_load():
@@ -53,7 +58,24 @@ def UCDP_load():
 
 #Econ Data
 def worldbank_load():
-  pass
+  indicators = {"PV.EST": "political stability", #Political stability, if running a statistical model, use this as DV
+                'NY.GDP.PCAP.CD': 'gdp_per_capita',  # GDP per capita (current US$)
+                "SP.POP.TOTL": 'population',         # Total population
+                "SE.XPD.TOTL.GD.ZS": 'education_spending'} #education spending
+  
+  start_date = dt.datetime(1946, 1, 1) #same date as UCDP
+  end_date = dt.datetime(2024, 1, 1) #see above
+
+  df = wbdata.get_dataframe(indicators, data_date=(start_date, end_date), convert_date=True)
+
+  #clean   and format
+  df = df.reset_index()
+  df["country"] = df["country"].astype(str) #to merge with UDCP
+  df['year'] = df['date'].dt.year.astype(int)
+  df = df[['country', 'year', 'political_stability', "gdp_per_capita", "population", "education_spending"]]
+
+  return df
+pass 
 
 #Fragile States Data
 def fragiles_load():
